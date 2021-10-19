@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="55dp"
+    android:layout_gravity="center"
+    android:padding="5dp"
+    android:background="#3377a2" >
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:layout_alignParentLeft="true"
+        android:layout_gravity="center_vertical"
+        android:clickable="true"
+        android:src="@drawable/davraz" />
+
+    <ImageView
+        android:id="@+id/veriAktarimiSync"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginLeft="152dp"
+        android:src="@drawable/aktarim_yok" />
+
+    <TextView
+        android:id="@+id/veriAktarimi"
+        android:layout_width="32dp"
+        android:layout_height="64dp"
+        android:gravity="right"
+        android:layout_marginTop="24dp"
+        android:layout_marginLeft="145dp"
+        android:text="1/9"
+        android:textColor="#FFF"
+        android:textSize="16sp"/>
+
+    <TextView
+        android:id="@+id/stationID"
+        android:layout_width="128dp"
+        android:layout_height="64dp"
+        android:layout_alignParentLeft="true"
+        android:gravity="right"
+        android:layout_marginLeft="170dp"
+        android:text="stationID\n1/6"
+        android:textColor="#FFF"
+        android:textSize="16sp"/>
+
+    <ImageView
+        android:id="@+id/wifi"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignParentRight="true"
+        android:gravity="right"
+        android:layout_marginRight="190dp"
+        android:src="@drawable/wifi" />
+
+    <ImageView
+        android:id="@+id/ethernet"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignParentRight="true"
+        android:gravity="right"
+        android:layout_marginRight="160dp"
+        android:src="@drawable/ethernet" />
+
+    <TextView
+        android:id="@+id/DateTime"
+        android:layout_width="128dp"
+        android:layout_height="64dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="64dp"
+        android:gravity="right"
+        android:text="SAAT\nTARİH"
+        android:textColor="#FFF"
+        android:textSize="16sp" />
+
+    <pl.droidsonroids.gif.GifImageView
+        android:id="@+id/dataTransfer_image"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/data_transfer" />
+
+</RelativeLayout>
