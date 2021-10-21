@@ -592,7 +592,7 @@ public class MainActivity extends Activity {
 
     public void blacklistGuncelle(){
         try{
-            // BLACKLIST TEST
+            // BLACKLIST
             OkHttpClient client = new OkHttpClient();
             String url = ipAdresi+":"+apiPort+"/api/card/2";
             Request request = new Request.Builder()
