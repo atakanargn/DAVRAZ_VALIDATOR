@@ -94,6 +94,7 @@ public class MainActivity extends Activity {
     private final int white = Color.parseColor("#66FFFFFF");
     private int durum = 0;
 
+    //weqd
     private ComponentName mAdminComponentName;
     private DevicePolicyManager mDevicePolicyManager;
 
