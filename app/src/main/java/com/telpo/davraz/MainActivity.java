@@ -82,7 +82,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import pl.droidsonroids.gif.GifImageView;
 
-
+//ilk commit
 public class MainActivity extends Activity {
     private NfcAdapter mNfcAdapter;
     private PendingIntent mPendingIntent;
