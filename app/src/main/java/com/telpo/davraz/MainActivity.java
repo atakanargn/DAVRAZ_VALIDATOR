@@ -93,8 +93,9 @@ public class MainActivity extends Activity {
     private final int green = Color.parseColor("#6626FF00");
     private final int white = Color.parseColor("#66FFFFFF");
     private int durum = 0;
+    private MediaPlayer gosterilmis_ses, mPlayer;
 
-    //weqd
+
     private ComponentName mAdminComponentName;
     private DevicePolicyManager mDevicePolicyManager;
 
@@ -189,6 +190,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
 
         // FULLSCREEN, HIDE NAVIGATION
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -928,7 +930,7 @@ public class MainActivity extends Activity {
             if(!okutuldu){
                 okutuldu=true;
                 if(gosterilmis.equals(basilanID)){
-                    MediaPlayer gosterilmis_ses = MediaPlayer.create(this, R.raw.gosterilmis);
+                    gosterilmis_ses = MediaPlayer.create(this, R.raw.gosterilmis);
                     gosterilmis_ses.start();
                     linearLayout.getBackground().setTint(red);
                     txtKartaYazilacak.setText("GÖSTERİLMİŞ KART!");
@@ -1100,8 +1102,10 @@ public class MainActivity extends Activity {
 
     }
 
+
     @SuppressLint("SetTextI18n")
     private NdefMessage buildNdefMessage(String parsedData) throws InterruptedException, UnsupportedEncodingException {
+
         NdefMessage message = null;
         String yazilacak="";
         String data = basilanID+",KOOP2021,0,sivil";
@@ -1109,6 +1113,7 @@ public class MainActivity extends Activity {
         Log.w("KART ŞİFRELEME - E",parsedData);
         parsedData = decrypt(parsedData);
         Log.w("KART ŞİFRELEME - D",parsedData);
+
         if(parsedData.contains("KOOP2021")){
             String[] income = parsedData.split(",");
             String kart_tipii = income[3];
@@ -1132,6 +1137,8 @@ public class MainActivity extends Activity {
                 message = new NdefMessage(new NdefRecord[]{record});
                 return message;
             }
+
+
 
             String strBakiye = Integer.toString(bakiye);
             if(bakiye<dusecek){
@@ -1157,7 +1164,7 @@ public class MainActivity extends Activity {
                 if(myDb.tarifeFee(kart_tipii)==0){
                     txtKartaYazilacak.setText("KARTINIZI ÇEKEBİLİRSİNİZ\n\nIyi eğlenceler!");
                 }else{
-                    txtKartaYazilacak.setText("KARTINIZI ÇEKEBİLİRSİNİZ\n\nIyi eğlenceler!\nKALAN BAKIYE : "+ strBakiye);
+                    txtKartaYazilacak.setText("KARTINIZI ÇEKEBİLİRSİNİZ\n\nIyi eğlenceler!\nKALAN BAKIYE : "+ strYeniBakiye);
                 }
                 linearLayout.getBackground().setTint(green);
                 data = basilanID+",KOOP2021,"+ strYeniBakiye +","+kart_tipii;
@@ -1173,6 +1180,7 @@ public class MainActivity extends Activity {
             data = basilanID + ",KOOP202G,0,0";
         }
 
+
         yazilacak = encrypt(data);
         String mimeType = "application/com.telpo.davraz";
 
@@ -1182,6 +1190,7 @@ public class MainActivity extends Activity {
 
         NdefRecord record = new NdefRecord(NdefRecord.TNF_MIME_MEDIA, mimeBytes, id, dataBytes);
         message = new NdefMessage(new NdefRecord[]{record});
+
         return message;
     }
 
