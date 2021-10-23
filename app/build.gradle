@@ -26,6 +26,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 dependencies {
@@ -41,4 +44,11 @@ dependencies {
         exclude group: 'org.json', module: 'json'
     }
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.19'
+    def room_version = "2.3.0"
+
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+
+    implementation "androidx.room:room-rxjava3:$room_version"
+    implementation "io.reactivex.rxjava3:rxandroid:3.0.0"
 }

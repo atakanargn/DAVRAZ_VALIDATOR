@@ -16,6 +16,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -52,6 +53,8 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.common.pos.api.util.PosUtil;
+import com.telpo.davraz.databinding.ActivityNfcBinding;
+import com.telpo.davraz.databinding.TitlebarBinding;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -81,7 +84,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import pl.droidsonroids.gif.GifImageView;
 
-
+//ilk commit deneme
 public class MainActivity extends Activity {
     private NfcAdapter mNfcAdapter;
     private PendingIntent mPendingIntent;
@@ -116,6 +119,12 @@ public class MainActivity extends Activity {
     private String gosterilmis="";
     private boolean okutuldu=false;
     private GifImageView arrowGif;
+
+   /* private ActivityNfcBinding nfcBinding;
+    private TitlebarBinding titlebarBinding;*/
+    private MediaPlayer tekli;
+    private MediaPlayer gecersiz;
+    private MediaPlayer yetersiz;
 
     private final Emitter.Listener relayOpen = new Emitter.Listener() {
         @SuppressLint("SetTextI18n")
@@ -189,6 +198,24 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //Binding test kodlari....
+       /* nfcBinding = ActivityNfcBinding.inflate(getLayoutInflater());
+        View viewNfc = nfcBinding.getRoot();
+        setContentView(viewNfc);
+        titlebarBinding = TitlebarBinding.inflate(getLayoutInflater());
+        View viewBinding = titlebarBinding.getRoot();
+        setContentView(viewBinding);*/
+
+
+
+
+
+
+
+
+
+
+
         // FULLSCREEN, HIDE NAVIGATION
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -197,6 +224,12 @@ public class MainActivity extends Activity {
                         View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
 
         setContentView(R.layout.activity_nfc);
+        tekli = MediaPlayer.create(this,R.raw.tekli);
+        gecersiz = MediaPlayer.create(this,R.raw.gecersiz);
+        yetersiz = MediaPlayer.create(this,R.raw.yetersiz);
+
+
+
 
         // EĞER UYGULAMA İLK DEFA AÇILIYORSA, VARSAYILAN AYARLAR GELECEKTİR
         myDb = new Database(this);
@@ -219,9 +252,9 @@ public class MainActivity extends Activity {
         socketPort = myDb.ayarGetir("socketPort");
         apiPort   = myDb.ayarGetir("apiPort");
 
-        if(myDb.ayarGetir("kurulum").equals("0")){
+       /* if(myDb.ayarGetir("kurulum").equals("0")){
             startActivity(new Intent(MainActivity.this,Settings.class));
-        }
+        }*/
 
         initUI();
 
@@ -283,6 +316,8 @@ public class MainActivity extends Activity {
 
                 if(sayac>=246){
                     String path = "android.resource://" + getPackageName() + "/" + R.raw.video1;
+                    /*nfcBinding.videoView.setVideoURI(Uri.parse(path));
+                    nfcBinding.videoView.start();*/
                     video.setVideoURI(Uri.parse(path));
                     video.start();
                     sayac=0;
@@ -319,8 +354,9 @@ public class MainActivity extends Activity {
             @Override
             public void run() {
                 if(myDb.ayarGetir("kurulum").equals("1")){
-                    guncelle();
+
                 }
+                guncelle();
                 veriIletimiTimer.postDelayed(this,10000);
             }
         }, 1000);
@@ -378,7 +414,8 @@ public class MainActivity extends Activity {
         String path = "android.resource://" + getPackageName() + "/" + R.raw.video1;
         video.setVideoURI(Uri.parse(path));
         video.start();
-
+       /* nfcBinding.videoView.setVideoURI(Uri.parse(path));
+        nfcBinding.videoView.start();*/
 
     }
 
@@ -968,13 +1005,14 @@ public class MainActivity extends Activity {
                                 e.printStackTrace();
                             }
                             if (durum == 1) {
-                                MediaPlayer tekli = MediaPlayer.create(this, R.raw.tekli);
+                                //MediaPlayer tekli = MediaPlayer.create(this, R.raw.tekli);
                                 tekli.start();
+
                             } else if (durum == -1) {
-                                MediaPlayer gecersiz = MediaPlayer.create(this, R.raw.gecersiz);
+                                //MediaPlayer gecersiz = MediaPlayer.create(this, R.raw.gecersiz);
                                 gecersiz.start();
                             } else if (durum == 2) {
-                                MediaPlayer yetersiz = MediaPlayer.create(this, R.raw.yetersiz);
+                                //MediaPlayer yetersiz = MediaPlayer.create(this, R.raw.yetersiz);
                                 yetersiz.start();
                             }
                             arrowGif.setImageResource(R.drawable.arrow);
