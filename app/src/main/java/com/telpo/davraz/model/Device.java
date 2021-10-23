@@ -25,6 +25,13 @@ public class Device {
     @ColumnInfo(name = "version")
     public  int version;
 
-
-
+    public Device(String type, String stationTag, String stationId, String turnikeDelay, String cardDelay, int qrNum, int version) {
+        this.type = type;
+        this.stationTag = stationTag;
+        this.stationId = stationId;
+        this.turnikeDelay = turnikeDelay;
+        this.cardDelay = cardDelay;
+        this.qrNum = qrNum;
+        this.version = version;
+    }
 }

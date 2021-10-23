@@ -16,5 +16,9 @@ public class DeviceCard {
     @ColumnInfo(name = "user")
     public String user;
 
-
+    public DeviceCard(String uid, int status, String user) {
+        this.uid = uid;
+        this.status = status;
+        this.user = user;
+    }
 }

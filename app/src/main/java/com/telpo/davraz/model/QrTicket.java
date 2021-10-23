@@ -20,4 +20,11 @@ public class QrTicket {
     @ColumnInfo(name = "tarih")
     public String tarih;
 
+    public QrTicket(String uid, String status, String creator, String user, String tarih) {
+        this.uid = uid;
+        this.status = status;
+        this.creator = creator;
+        this.user = user;
+        this.tarih = tarih;
+    }
 }

@@ -23,5 +23,12 @@ public class CardReport {
     @ColumnInfo(name = "photo")
     public String photo;
 
-
+    public CardReport(String uid, String istasyon, int onceki, int sonraki, String tarih, String photo) {
+        this.uid = uid;
+        this.istasyon = istasyon;
+        this.onceki = onceki;
+        this.sonraki = sonraki;
+        this.tarih = tarih;
+        this.photo = photo;
+    }
 }

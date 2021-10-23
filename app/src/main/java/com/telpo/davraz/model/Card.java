@@ -15,6 +15,9 @@ public class Card {
     @ColumnInfo(name = "user")
     public String user;
 
-
-
+    public Card(String uid, int status, String user) {
+        this.uid = uid;
+        this.status = status;
+        this.user = user;
+    }
 }
