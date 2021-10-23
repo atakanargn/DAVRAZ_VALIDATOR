@@ -14,7 +14,8 @@ public class UserAvatar {
     @ColumnInfo(name = "version")
     public int version;
 
-
-
-
+    public UserAvatar(String uid, int version) {
+        this.uid = uid;
+        this.version = version;
+    }
 }

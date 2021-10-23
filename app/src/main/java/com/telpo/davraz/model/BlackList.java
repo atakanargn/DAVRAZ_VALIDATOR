@@ -10,4 +10,7 @@ public class BlackList {
     @ColumnInfo(name = "uid")
     public String uid;
 
+    public BlackList(String uid) {
+        this.uid = uid;
+    }
 }

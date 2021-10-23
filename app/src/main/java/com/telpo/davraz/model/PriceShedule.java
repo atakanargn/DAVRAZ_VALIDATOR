@@ -23,5 +23,12 @@ public class PriceShedule {
     @ColumnInfo(name = "fee")
     public int fee;
 
-
+    public PriceShedule(String device, int id, String name, String success, String ses, int fee) {
+        this.device = device;
+        this.id = id;
+        this.name = name;
+        this.success = success;
+        this.ses = ses;
+        this.fee = fee;
+    }
 }
