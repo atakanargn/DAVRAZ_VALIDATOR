@@ -302,7 +302,7 @@ public class MainActivity extends Activity {
                     video.start();
 */
 
-
+//123
                 if(sayac%15==0) socketeBaglan();
 
                 sayac=sayac+1;
