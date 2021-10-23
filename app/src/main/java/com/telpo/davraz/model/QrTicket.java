@@ -9,8 +9,8 @@ public class QrTicket {
 
 
 
-    @PrimaryKey(autoGenerate = true)
-    public int uid;
+    @ColumnInfo(name = "uid")
+    public String uid;
     @ColumnInfo(name = "status")
     public String status;
     @ColumnInfo(name = "creator")

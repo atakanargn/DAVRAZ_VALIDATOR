@@ -9,8 +9,8 @@ public class DeviceCard {
 
 
 
-    @PrimaryKey(autoGenerate = true)
-    public int uid;
+    @ColumnInfo(name = "uid")
+    public String uid;
     @ColumnInfo(name = "status")
     public int status;
     @ColumnInfo(name = "user")

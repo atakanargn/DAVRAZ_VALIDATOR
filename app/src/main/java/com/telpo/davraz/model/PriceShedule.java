@@ -8,8 +8,7 @@ import androidx.room.PrimaryKey;
 public class PriceShedule {
 
 
-    @PrimaryKey(autoGenerate = true)
-    public int uid;
+
 
     @ColumnInfo(name = "device")
     public String device;
