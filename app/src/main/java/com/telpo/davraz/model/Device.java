@@ -9,8 +9,7 @@ public class Device {
 
 
 
-    @PrimaryKey(autoGenerate = true)
-    public int uid;
+
     @ColumnInfo(name = "type")
     public String type;
     @ColumnInfo(name = "stationTag")

@@ -10,8 +10,8 @@ public class CardReport {
 
 
 
-    @PrimaryKey(autoGenerate = true)
-    public int uid;
+    @ColumnInfo(name = "uid")
+    public String uid;
     @ColumnInfo(name = "istasyon")
     public String istasyon;
     @ColumnInfo(name = "onceki")
