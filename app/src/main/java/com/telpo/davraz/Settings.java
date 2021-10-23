@@ -152,8 +152,6 @@ public class Settings extends Activity {
         turnikeBekleme_edit.setText(myDb.ayarGetir("turnikeBekleme"));
         kartBekleme_edit.setText(myDb.ayarGetir("kartBekleme"));
         try{
-
-
             IO.Options options = new IO.Options();
             OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
                     .connectTimeout(0, TimeUnit.MILLISECONDS)
