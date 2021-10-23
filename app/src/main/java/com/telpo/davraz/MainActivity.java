@@ -219,9 +219,9 @@ public class MainActivity extends Activity {
         socketPort = myDb.ayarGetir("socketPort");
         apiPort   = myDb.ayarGetir("apiPort");
 
-        if(myDb.ayarGetir("kurulum").equals("0")){
+    /*    if(myDb.ayarGetir("kurulum").equals("0")){
             startActivity(new Intent(MainActivity.this,Settings.class));
-        }
+        }*/
 
         initUI();
 
@@ -281,12 +281,27 @@ public class MainActivity extends Activity {
                 currentDateandTime = new SimpleDateFormat("dd-MM-yyyy\nHH:mm:ss").format(new Date());
                 DateTime.setText(currentDateandTime);
 
+
                 if(sayac>=246){
                     String path = "android.resource://" + getPackageName() + "/" + R.raw.video1;
                     video.setVideoURI(Uri.parse(path));
                     video.start();
                     sayac=0;
                 }
+
+                 /*   String path = "android.resource://" + getPackageName() + "/" + R.raw.video1;
+                    video.setVideoURI(Uri.parse(path));
+                    video.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                        @Override
+                        public void onPrepared(MediaPlayer mediaPlayer) {
+                            mediaPlayer.setLooping(true);
+
+                        }
+                    });
+
+                    video.start();
+*/
+
 
                 if(sayac%15==0) socketeBaglan();
 
@@ -319,8 +334,8 @@ public class MainActivity extends Activity {
             @Override
             public void run() {
                 if(myDb.ayarGetir("kurulum").equals("1")){
-                    guncelle();
                 }
+                    guncelle();
                 veriIletimiTimer.postDelayed(this,10000);
             }
         }, 1000);
@@ -1156,7 +1171,7 @@ public class MainActivity extends Activity {
                 if(myDb.tarifeFee(kart_tipii)==0){
                     txtKartaYazilacak.setText("KARTINIZI ÇEKEBİLİRSİNİZ\n\nIyi eğlenceler!");
                 }else{
-                    txtKartaYazilacak.setText("KARTINIZI ÇEKEBİLİRSİNİZ\n\nIyi eğlenceler!\nKALAN BAKIYE : "+ strBakiye);
+                    txtKartaYazilacak.setText("KARTINIZI ÇEKEBİLİRSİNİZ\n\nIyi eğlenceler!\nKALAN BAKIYE : "+ strYeniBakiye);
                 }
                 linearLayout.getBackground().setTint(green);
                 data = basilanID+",KOOP2021,"+ strYeniBakiye +","+kart_tipii;
