@@ -1141,7 +1141,7 @@ public class MainActivity extends Activity {
 
 
             String strBakiye = Integer.toString(bakiye);
-            if(bakiye<dusecek){
+            if(bakiye<=dusecek){
                 Log.i("BASIM","BAKIYE YETERSIZ");
                 data = basilanID+",KOOP2021,"+strBakiye+","+kart_tipii;
                 durum=2;
