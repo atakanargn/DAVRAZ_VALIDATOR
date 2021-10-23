@@ -53,8 +53,6 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.common.pos.api.util.PosUtil;
-import com.telpo.davraz.databinding.ActivityNfcBinding;
-import com.telpo.davraz.databinding.TitlebarBinding;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -120,11 +118,15 @@ public class MainActivity extends Activity {
     private boolean okutuldu=false;
     private GifImageView arrowGif;
 
-   /* private ActivityNfcBinding nfcBinding;
-    private TitlebarBinding titlebarBinding;*/
     private MediaPlayer tekli;
     private MediaPlayer gecersiz;
     private MediaPlayer yetersiz;
+    private String kart_tipii;
+
+    private String strYeniBakiye,strBakiye;
+    private int bakiye,yeniBakiye,dusecek;
+
+    private boolean kartVar;
 
     private final Emitter.Listener relayOpen = new Emitter.Listener() {
         @SuppressLint("SetTextI18n")
@@ -184,9 +186,6 @@ public class MainActivity extends Activity {
         }
     };
 
-    public MainActivity() {
-    }
-
     public void roleKapat() {
         final Handler handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(() -> PosUtil.setRelayPower(0), 500);
@@ -222,7 +221,6 @@ public class MainActivity extends Activity {
         getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
                         View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-
         setContentView(R.layout.activity_nfc);
         tekli = MediaPlayer.create(this,R.raw.tekli);
         gecersiz = MediaPlayer.create(this,R.raw.gecersiz);
@@ -235,7 +233,7 @@ public class MainActivity extends Activity {
         myDb = new Database(this);
         try {
             myDb.ayarEkle("turnikeIsim","-");
-            myDb.ayarEkle("kurulum","0");
+            myDb.ayarEkle("kurulum","1");
             myDb.ayarEkle("istasyonID", "-");
             myDb.ayarEkle("sunucuIP", "88.255.248.244");
             myDb.ayarEkle("socketPort", "9872");
@@ -259,7 +257,6 @@ public class MainActivity extends Activity {
         initUI();
 
         istasyon_id = myDb.ayarGetir("istasyonID");
-        stationID.setText(istasyon_id+"\n"+myDb.ayarGetir("turnikeIsim"));
 
         // NFC AYARLARI
         NfcManager mNfcManager = (NfcManager) getSystemService(Context.NFC_SERVICE);
@@ -548,6 +545,7 @@ public class MainActivity extends Activity {
                         veriAktarimiSync.setVisibility(View.VISIBLE);
                     });
                 }
+
                 @Override
                 public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                     runOnUiThread(() -> {
@@ -555,7 +553,6 @@ public class MainActivity extends Activity {
                         veriAktarimi.setText("1/9");
                     });
                     if (response.isSuccessful()) {
-                        assert response.body() != null;
                         final String myResponse = response.body().string();
                         MainActivity.this.runOnUiThread(() -> {
 
@@ -684,7 +681,8 @@ public class MainActivity extends Activity {
     }
 
     public void fotografGuncelle(){
-        try{
+        tarifeGuncelle();
+        /*try{
             OkHttpClient client = new OkHttpClient();
             String url = ipAdresi+":"+apiPort+"/api/user/imagelist";
             Request request = new Request.Builder()
@@ -710,12 +708,16 @@ public class MainActivity extends Activity {
                         final String myResponse = response.body().string();
                         MainActivity.this.runOnUiThread(() -> {
                             try {
-                                String[] parts = myResponse.split(",");
-                                for (String uid : parts) {
-                                    File image = new File("/storage/emulated/0/Pictures/"+uid+".jpg");
-                                    if(!image.exists()){
+                                String[] uids = myResponse.split(",");
+                                for (String uid : uids) {
+                                    String[] parts = uid.split(".");
+
+                                    File image = new File("/storage/emulated/0/Pictures/"+parts[0]+".jpg");
+                                    if(!image.exists() && Integer.parseInt(parts[1])>Integer.parseInt(myDb.resimGetir(parts[0]))){
                                         Log.w("image",ipAdresi+":"+apiPort+"/api/user/image/"+uid);
                                         downloadImageNew(uid,ipAdresi+":"+apiPort+"/api/user/image/"+uid);
+                                    }else{
+
                                     }
                                 }
                                 Log.i("Güncelleme", "4 - MÜŞTERİ RESİMLERİ");
@@ -730,7 +732,7 @@ public class MainActivity extends Activity {
             });
         }catch (Exception e){
             Log.w("Güncelleme",e);
-        }
+        }*/
     }
 
     public void tarifeGuncelle(){
@@ -894,6 +896,7 @@ public class MainActivity extends Activity {
             Log.w("Güncelleme",e);
         }
     }
+
     public static void newCardReport(String uid,int onceki,int sonraki,String dateTime,String istasyon,boolean offline,String bid){
         try{
             JSONObject jsonObject = new JSONObject();
@@ -961,6 +964,8 @@ public class MainActivity extends Activity {
             basilanID=ByteArrayToHexString(Objects.<byte[]>requireNonNull(intent.getByteArrayExtra(NfcAdapter.EXTRA_ID)));
             Log.w("OKUTULAN KART",basilanID);
 
+            kartVar=true;
+
             if(!okutuldu){
                 okutuldu=true;
                 if(gosterilmis.equals(basilanID)){
@@ -1004,28 +1009,6 @@ public class MainActivity extends Activity {
                             } catch (InterruptedException | UnsupportedEncodingException e) {
                                 e.printStackTrace();
                             }
-                            if (durum == 1) {
-                                //MediaPlayer tekli = MediaPlayer.create(this, R.raw.tekli);
-                                tekli.start();
-
-                            } else if (durum == -1) {
-                                //MediaPlayer gecersiz = MediaPlayer.create(this, R.raw.gecersiz);
-                                gecersiz.start();
-                            } else if (durum == 2) {
-                                //MediaPlayer yetersiz = MediaPlayer.create(this, R.raw.yetersiz);
-                                yetersiz.start();
-                            }
-                            arrowGif.setImageResource(R.drawable.arrow);
-                            arrowGif.setVisibility(View.VISIBLE);
-                            roleKapat();
-                            final Handler handler = new Handler(Looper.getMainLooper());
-                            handler.postDelayed(() -> {
-                                linearLayout.getBackground().setTint(white);
-                                photoView.setVisibility(View.INVISIBLE);
-                                txtKartaYazilacak.setText("Lütfen kartınızı okutunuz");
-                                arrowGif.setVisibility(View.INVISIBLE);
-                                okutuldu=false;
-                            }, Integer.parseInt(myDb.ayarGetir("turnikeBekleme")) * 1000L);
                         } else {
                             MediaPlayer gecersiz = MediaPlayer.create(this, R.raw.gecersiz);
                             gecersiz.start();
@@ -1103,7 +1086,20 @@ public class MainActivity extends Activity {
             Ndef ndef = Ndef.get(tag);
             if (ndef != null)
             {
+
                 ndef.connect();
+
+                final Handler kartVarTimer = new Handler(Looper.getMainLooper());
+                kartVarTimer.postDelayed(new Runnable() {
+                        @SuppressLint("SimpleDateFormat")
+                        @Override
+                        public void run() {
+                            if(!ndef.isConnected()){
+                                kartVar=false;
+                            }
+                            kartVarTimer.postDelayed(this,10);
+                        }
+                }, 10);
 
                 if (!ndef.isWritable())
                 {
@@ -1118,7 +1114,74 @@ public class MainActivity extends Activity {
                     return;
                 }
 
-                ndef.writeNdefMessage(message);
+                if(kartVar){
+                    try{
+                        ndef.writeNdefMessage(message);
+                    }catch(java.io.IOException e){
+                        txtKartaYazilacak.setVisibility(View.VISIBLE);
+                        txtKartaYazilacak.setText("HATAHATAHATA");
+                        linearLayout.getBackground().setTint(red);
+                    }
+
+                    if(dusecek==-1){
+                        Log.i("BASIM","GEÇERSİZ 1");
+                        durum=2;
+                        txtKartaYazilacak.setVisibility(View.VISIBLE);
+                        txtKartaYazilacak.setText("GEÇERSİZ KART!");
+                        linearLayout.getBackground().setTint(red);
+                    }
+
+                    if(bakiye<dusecek){
+                        durum=2;
+                        txtKartaYazilacak.setVisibility(View.VISIBLE);
+                        txtKartaYazilacak.setText("BAKIYE YETERSIZ!");
+                        linearLayout.getBackground().setTint(red);
+                    }else{
+                        newCardReport(basilanID,bakiye,yeniBakiye,currentDateandTime,istasyon_id,false,"0");
+                        txtKartaYazilacak.setVisibility(View.VISIBLE);
+                        photoView.setImageResource(0);
+                        File imgFile = new  File("/storage/emulated/0/Pictures/"+basilanID+".jpg");
+                        if(imgFile.exists()){
+                            Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+                            photoView.setImageBitmap(myBitmap);
+                        }
+                        photoView.setVisibility(View.VISIBLE);
+                        if(myDb.tarifeFee(kart_tipii)==0){
+                            txtKartaYazilacak.setText("KARTINIZI ÇEKEBİLİRSİNİZ\n\nIyi eğlenceler!");
+                        }else{
+                            txtKartaYazilacak.setText("KARTINIZI ÇEKEBİLİRSİNİZ\n\nIyi eğlenceler!\nKALAN BAKIYE : "+ strBakiye);
+                        }
+                        linearLayout.getBackground().setTint(green);
+                        PosUtil.setRelayPower(1);
+                        durum=1;
+                    }
+
+                    if (durum == 1) {
+                        MediaPlayer tekli = MediaPlayer.create(this, R.raw.tekli);
+                        tekli.start();
+                    } else if (durum == -1) {
+                        MediaPlayer gecersiz = MediaPlayer.create(this, R.raw.gecersiz);
+                        gecersiz.start();
+                    } else if (durum == 2) {
+                        MediaPlayer yetersiz = MediaPlayer.create(this, R.raw.yetersiz);
+                        yetersiz.start();
+                    }
+                    arrowGif.setImageResource(R.drawable.arrow);
+                    arrowGif.setVisibility(View.VISIBLE);
+                }else{
+                    txtKartaYazilacak.setVisibility(View.VISIBLE);
+                    txtKartaYazilacak.setText("Kartınızı tekrar okutun!");
+                    linearLayout.getBackground().setTint(red);
+                }
+                roleKapat();
+                final Handler handler = new Handler(Looper.getMainLooper());
+                handler.postDelayed(() -> {
+                    linearLayout.getBackground().setTint(white);
+                    photoView.setVisibility(View.INVISIBLE);
+                    txtKartaYazilacak.setText("Lütfen kartınızı okutunuz");
+                    arrowGif.setVisibility(View.INVISIBLE);
+                    okutuldu=false;
+                }, Integer.parseInt(myDb.ayarGetir("turnikeBekleme")) * 1000L);
             }else {
                 NdefFormatable format = NdefFormatable.get(tag);
                 if (format != null) {
@@ -1148,15 +1211,10 @@ public class MainActivity extends Activity {
         Log.w("KART ŞİFRELEME - D",parsedData);
         if(parsedData.contains("KOOP2021")){
             String[] income = parsedData.split(",");
-            String kart_tipii = income[3];
-            int bakiye = Integer.parseInt(income[2]);
-            int dusecek = myDb.tarifeFee(kart_tipii);
+            kart_tipii = income[3];
+            bakiye = Integer.parseInt(income[2]);
+            dusecek = myDb.tarifeFee(kart_tipii);
             if(dusecek==-1){
-                Log.i("BASIM","GEÇERSİZ 1");
-                durum=2;
-                txtKartaYazilacak.setVisibility(View.VISIBLE);
-                txtKartaYazilacak.setText("GEÇERSİZ KART!");
-                linearLayout.getBackground().setTint(red);
                 data = basilanID+",KOOP202G,0,G";
                 yazilacak = encrypt(data);
                 String mimeType = "application/com.telpo.davraz";
@@ -1170,36 +1228,15 @@ public class MainActivity extends Activity {
                 return message;
             }
 
-            String strBakiye = Integer.toString(bakiye);
-            if(bakiye<=dusecek){
+            strBakiye = Integer.toString(bakiye);
+            if(bakiye<dusecek){
                 Log.i("BASIM","BAKIYE YETERSIZ");
                 data = basilanID+",KOOP2021,"+strBakiye+","+kart_tipii;
-                durum=2;
-                txtKartaYazilacak.setVisibility(View.VISIBLE);
-                txtKartaYazilacak.setText("BAKIYE YETERSIZ!");
-                linearLayout.getBackground().setTint(red);
             }else{
                 Log.i("BASIM","GEÇEBİLİR");
                 int yeniBakiye=bakiye-dusecek;
-                String strYeniBakiye = Integer.toString(yeniBakiye);
-                newCardReport(basilanID,bakiye,yeniBakiye,currentDateandTime,istasyon_id,false,"0");
-                txtKartaYazilacak.setVisibility(View.VISIBLE);
-                photoView.setImageResource(0);
-                File imgFile = new  File("/storage/emulated/0/Pictures/"+basilanID+".jpg");
-                if(imgFile.exists()){
-                    Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                    photoView.setImageBitmap(myBitmap);
-                }
-                photoView.setVisibility(View.VISIBLE);
-                if(myDb.tarifeFee(kart_tipii)==0){
-                    txtKartaYazilacak.setText("KARTINIZI ÇEKEBİLİRSİNİZ\n\nIyi eğlenceler!");
-                }else{
-                    txtKartaYazilacak.setText("KARTINIZI ÇEKEBİLİRSİNİZ\n\nIyi eğlenceler!\nKALAN BAKIYE : "+ strBakiye);
-                }
-                linearLayout.getBackground().setTint(green);
+                strYeniBakiye = Integer.toString(yeniBakiye);
                 data = basilanID+",KOOP2021,"+ strYeniBakiye +","+kart_tipii;
-                PosUtil.setRelayPower(1);
-                durum=1;
             }
         }else {
             Log.i("BASIM","GEÇERSİZ 2");
@@ -1272,6 +1309,7 @@ public class MainActivity extends Activity {
         }
         return null;
     }
+
     @Nullable
     public static String decrypt(String value) {
         String key = "aesEncryptionKey";

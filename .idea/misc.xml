@@ -29,12 +29,9 @@
         <entry key="..\:/Users/Atakan/Desktop/VALIDATOR/app/src/main/res/layout/titlebar.xml" value="0.5" />
         <entry key="..\:/Users/Atakan/Desktop/VALIDATOR/app/src/main/res/xml/device_admin_receiver.xml" value="0.2390625" />
         <entry key="..\:/Users/Atakan/Desktop/VALIDATOR/app/src/main/res/xml/policies.xml" value="0.25" />
-        <entry key="..\:/Users/Yusuf/OneDrive/Belgeler/GitHub/DAVRAZ_VALIDATOR/app/src/main/res/layout/activity_nfc.xml" value="0.20108695652173914" />
-        <entry key="..\:/Users/Yusuf/OneDrive/Belgeler/GitHub/DAVRAZ_VALIDATOR/app/src/main/res/layout/titlebar.xml" value="0.20108695652173914" />
       </map>
     </option>
   </component>
-  <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="NullableNotNullManager">
     <option name="myDefaultNullable" value="android.support.annotation.Nullable" />
     <option name="myDefaultNotNull" value="android.support.annotation.NonNull" />
