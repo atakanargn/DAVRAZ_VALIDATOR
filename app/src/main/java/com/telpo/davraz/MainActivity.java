@@ -126,6 +126,79 @@ public class MainActivity extends Activity {
     private MediaPlayer gecersiz;
     private MediaPlayer yetersiz;
 
+    /*
+
+    Room Dao Database Kullanımı....
+
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
+
+    ----compositeDisposable referansı yukarıdaki şekilde globalde tanımlanır-----
+    DeviceDatabase deviceDatabase;
+    DeviceDao deviceDao;
+
+    deviceDatabase = Room.databaseBuilder(MainActivity.this,DeviceDatabase.class,"Device").build();
+
+    deviceDao = DeviceDatabase.DeviceDao();
+
+    ----DeviceDatabase ve DeviceDao globalde tanımlanır ve nullPointerException hatası almamak için referansları----
+    ----onCreate()' de bu şekilde tanımlanır----
+
+
+
+
+
+
+     compositeDisposable.add(deviceDao.getAll()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(MainActivity.this::getData));
+
+    ---- yukardaki tanımlamada bilgileri çekeriz (Liste Şeklinde) .subscribe'ın içi ise getData metoduna gitmemizi sağlar
+     (aşağıdaki gibi bir metod)----
+
+
+    örn: public void getData(List<Device> deviceList){
+
+
+
+    }
+    ---- yukardaki metodda istediğimiz işlemler yapılır(Kontrol işlemleri gibi) ----
+
+
+
+
+    DeviceDao devicedao = new DeviceDao(Bilgilerrrrr);
+    compositeDisposable.add(deviceDao.insert(device)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe());
+
+
+
+    compositeDisposable.add(placeDao.delete(Silinecek obje)
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe());
+
+    compositeDisposable.add(placeDao.update(updatelenecek obje)
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe());
+
+    ----Yukardaki şekilde kullanılır .subscribeOn database işlemlerini ana ekranda yapmamamızı sağlar buda bize performans kazandırır
+
+
+
+                }
+
+
+
+
+     */
+
+
+
+
     private final Emitter.Listener relayOpen = new Emitter.Listener() {
         @SuppressLint("SetTextI18n")
         @Override
