@@ -16,6 +16,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -282,27 +283,15 @@ public class MainActivity extends Activity {
                 DateTime.setText(currentDateandTime);
 
 
-                if(sayac>=246){
+               /* if(sayac>=246){
                     String path = "android.resource://" + getPackageName() + "/" + R.raw.video1;
                     video.setVideoURI(Uri.parse(path));
                     video.start();
                     sayac=0;
-                }
+                }*/
 
-                 /*   String path = "android.resource://" + getPackageName() + "/" + R.raw.video1;
-                    video.setVideoURI(Uri.parse(path));
-                    video.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                        @Override
-                        public void onPrepared(MediaPlayer mediaPlayer) {
-                            mediaPlayer.setLooping(true);
 
-                        }
-                    });
 
-                    video.start();
-*/
-
-//123
                 if(sayac%15==0) socketeBaglan();
 
                 sayac=sayac+1;
@@ -389,10 +378,19 @@ public class MainActivity extends Activity {
             guncelle();
         });
 
+
         VideoView video = findViewById(R.id.videoView);
+
+        video.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                mp.setLooping(true);
+            }
+        });
         String path = "android.resource://" + getPackageName() + "/" + R.raw.video1;
         video.setVideoURI(Uri.parse(path));
         video.start();
+
 
 
     }
@@ -1148,7 +1146,7 @@ public class MainActivity extends Activity {
             }
 
             String strBakiye = Integer.toString(bakiye);
-            if(bakiye<=dusecek){
+            if(bakiye<dusecek){
                 Log.i("BASIM","BAKIYE YETERSIZ");
                 data = basilanID+",KOOP2021,"+strBakiye+","+kart_tipii;
                 durum=2;
