@@ -16,6 +16,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -219,9 +220,9 @@ public class MainActivity extends Activity {
         socketPort = myDb.ayarGetir("socketPort");
         apiPort   = myDb.ayarGetir("apiPort");
 
-        if(myDb.ayarGetir("kurulum").equals("0")){
+    /*    if(myDb.ayarGetir("kurulum").equals("0")){
             startActivity(new Intent(MainActivity.this,Settings.class));
-        }
+        }*/
 
         initUI();
 
@@ -281,12 +282,15 @@ public class MainActivity extends Activity {
                 currentDateandTime = new SimpleDateFormat("dd-MM-yyyy\nHH:mm:ss").format(new Date());
                 DateTime.setText(currentDateandTime);
 
-                if(sayac>=246){
+
+               /* if(sayac>=246){
                     String path = "android.resource://" + getPackageName() + "/" + R.raw.video1;
                     video.setVideoURI(Uri.parse(path));
                     video.start();
                     sayac=0;
-                }
+                }*/
+
+
 
                 if(sayac%15==0) socketeBaglan();
 
@@ -319,8 +323,8 @@ public class MainActivity extends Activity {
             @Override
             public void run() {
                 if(myDb.ayarGetir("kurulum").equals("1")){
-                    guncelle();
                 }
+                    guncelle();
                 veriIletimiTimer.postDelayed(this,10000);
             }
         }, 1000);
@@ -374,10 +378,19 @@ public class MainActivity extends Activity {
             guncelle();
         });
 
+
         VideoView video = findViewById(R.id.videoView);
+
+        video.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                mp.setLooping(true);
+            }
+        });
         String path = "android.resource://" + getPackageName() + "/" + R.raw.video1;
         video.setVideoURI(Uri.parse(path));
         video.start();
+
 
 
     }
@@ -1156,7 +1169,7 @@ public class MainActivity extends Activity {
                 if(myDb.tarifeFee(kart_tipii)==0){
                     txtKartaYazilacak.setText("KARTINIZI ÇEKEBİLİRSİNİZ\n\nIyi eğlenceler!");
                 }else{
-                    txtKartaYazilacak.setText("KARTINIZI ÇEKEBİLİRSİNİZ\n\nIyi eğlenceler!\nKALAN BAKIYE : "+ strBakiye);
+                    txtKartaYazilacak.setText("KARTINIZI ÇEKEBİLİRSİNİZ\n\nIyi eğlenceler!\nKALAN BAKIYE : "+ strYeniBakiye);
                 }
                 linearLayout.getBackground().setTint(green);
                 data = basilanID+",KOOP2021,"+ strYeniBakiye +","+kart_tipii;
