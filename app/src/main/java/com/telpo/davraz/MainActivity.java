@@ -101,6 +101,7 @@ public class MainActivity extends Activity {
     private int sayac;
 
     private String istasyon_id;
+    private MediaPlayer ses;
 
     private String basilanID;
 
@@ -940,8 +941,14 @@ public class MainActivity extends Activity {
             if(!okutuldu){
                 okutuldu=true;
                 if(gosterilmis.equals(basilanID)){
-                    MediaPlayer gosterilmis_ses = MediaPlayer.create(this, R.raw.gosterilmis);
-                    gosterilmis_ses.start();
+                    ses = MediaPlayer.create(this,R.raw.gosterilmis);
+                    ses.start();
+                    ses.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mediaPlayer) {
+                            ses.release();
+                        }
+                    });
                     linearLayout.getBackground().setTint(red);
                     txtKartaYazilacak.setText("GÖSTERİLMİŞ KART!");
                     roleKapat();
@@ -960,8 +967,15 @@ public class MainActivity extends Activity {
                         finish();
                     }else {
                         if (myDb.blacklistController(basilanID)) {
-                            MediaPlayer gecersiz = MediaPlayer.create(this, R.raw.gecersiz);
-                            gecersiz.start();
+                            ses = MediaPlayer.create(this,R.raw.gecersiz);
+                            ses.start();
+                            ses.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                @Override
+                                public void onCompletion(MediaPlayer mediaPlayer) {
+                                    ses.release();
+                                }
+                            });
+
                             linearLayout.getBackground().setTint(red);
                             txtKartaYazilacak.setText("KARTINIZ KAPATILMIŞTIR!");
                             roleKapat();
@@ -981,14 +995,32 @@ public class MainActivity extends Activity {
                                 e.printStackTrace();
                             }
                             if (durum == 1) {
-                                MediaPlayer tekli = MediaPlayer.create(this, R.raw.tekli);
-                                tekli.start();
+                                ses = MediaPlayer.create(this, R.raw.tekli);
+                                ses.start();
+                                ses.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                    @Override
+                                    public void onCompletion(MediaPlayer mediaPlayer) {
+                                        ses.release();
+                                    }
+                                });
                             } else if (durum == -1) {
-                                MediaPlayer gecersiz = MediaPlayer.create(this, R.raw.gecersiz);
-                                gecersiz.start();
+                                ses = MediaPlayer.create(this, R.raw.gecersiz);
+                                ses.start();
+                                ses.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                    @Override
+                                    public void onCompletion(MediaPlayer mediaPlayer) {
+                                        ses.release();
+                                    }
+                                });
                             } else if (durum == 2) {
-                                MediaPlayer yetersiz = MediaPlayer.create(this, R.raw.yetersiz);
-                                yetersiz.start();
+                                ses = MediaPlayer.create(this, R.raw.yetersiz);
+                                ses.start();
+                                ses.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                    @Override
+                                    public void onCompletion(MediaPlayer mediaPlayer) {
+                                        ses.release();
+                                    }
+                                });
                             }
                             arrowGif.setImageResource(R.drawable.arrow);
                             arrowGif.setVisibility(View.VISIBLE);
@@ -1002,8 +1034,14 @@ public class MainActivity extends Activity {
                                 okutuldu=false;
                             }, Integer.parseInt(myDb.ayarGetir("turnikeBekleme")) * 1000L);
                         } else {
-                            MediaPlayer gecersiz = MediaPlayer.create(this, R.raw.gecersiz);
-                            gecersiz.start();
+                            ses = MediaPlayer.create(this,R.raw.gecersiz);
+                            ses.start();
+                            ses.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                @Override
+                                public void onCompletion(MediaPlayer mediaPlayer) {
+                                    ses.release();
+                                }
+                            });
                             linearLayout.getBackground().setTint(red);
                             txtKartaYazilacak.setText("TANIMSIZ KART");
                             roleKapat();
