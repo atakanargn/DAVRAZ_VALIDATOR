@@ -89,7 +89,7 @@ public class MainActivity extends Activity {
     private TextView txtKartaYazilacak;
     private Button qroku;
     private LinearLayout linearLayout;
-    private TextView DateTime,stationID,veriAktarimi;
+    public TextView DateTime,stationID,veriAktarimi;
     private final int red = Color.parseColor("#66FF0000");
     private final int green = Color.parseColor("#6626FF00");
     private final int white = Color.parseColor("#66FFFFFF");
@@ -107,7 +107,7 @@ public class MainActivity extends Activity {
 
     private String currentDateandTime;
 
-    private ImageView photoView,veriAktarimiSync,ethernet,wifi;
+    public ImageView photoView,veriAktarimiSync,ethernet,wifi;
     private static Database myDb;
     private static String ipAdresi, socketPort,apiPort;
 
@@ -118,6 +118,7 @@ public class MainActivity extends Activity {
     private String gosterilmis="";
     private boolean okutuldu=false;
     private GifImageView arrowGif;
+    private Guncelle guncelle;
 
     private final Emitter.Listener relayOpen = new Emitter.Listener() {
         @SuppressLint("SetTextI18n")
@@ -241,6 +242,9 @@ public class MainActivity extends Activity {
         stationID.setText(istasyon_id+"\n"+myDb.ayarGetir("turnikeIsim"));
 
         socketeBaglan();
+        Guncelle guncelle = new Guncelle(myDb,this);
+        guncelle.tanimKartlarGuncelle();
+
     }
 
     @SuppressLint("QueryPermissionsNeeded")
@@ -325,7 +329,9 @@ public class MainActivity extends Activity {
             public void run() {
                 if(myDb.ayarGetir("kurulum").equals("1")){
                 }
-                    guncelle();
+                    Guncelle guncelle = new Guncelle(myDb,MainActivity.this);
+                    guncelle.tanimKartlarGuncelle();
+
                 veriIletimiTimer.postDelayed(this,10000);
             }
         }, 1000);
@@ -376,7 +382,9 @@ public class MainActivity extends Activity {
             alert.setOnDismissListener(dialog1 -> alerthandler.removeCallbacks(runnable));
 
             alerthandler.postDelayed(runnable, 2000);
-            guncelle();
+            Guncelle guncelle = new Guncelle(myDb,MainActivity.this);
+            guncelle.tanimKartlarGuncelle();
+
         });
 
 
@@ -504,373 +512,6 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void guncelle(){
-        veriAktarimi.setVisibility(View.VISIBLE);
-        tanimKartlarGuncelle();
-    }
-
-    public void tanimKartlarGuncelle(){
-        try{
-            OkHttpClient client = new OkHttpClient();
-            String url = ipAdresi+":"+apiPort+"/api/card/tanimli";
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setText("1/9");
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimiSync.setVisibility(View.VISIBLE);
-                    });
-                }
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimi.setText("1/9");
-                    });
-                    if (response.isSuccessful()) {
-                        assert response.body() != null;
-                        final String myResponse = response.body().string();
-                        MainActivity.this.runOnUiThread(() -> {
-
-                            myDb.deleteAll("tanimliKartlar");
-                            try {
-                                String[] parts = myResponse.split(",");
-                                for (String uid : parts) {
-                                    myDb.kartEkle(uid);
-                                }
-                                Log.i("Güncelleme", "1 - TANIMLI KARTLAR");
-                                qrTicketGuncelleme();
-                            } catch (Exception e) {
-                                Log.w("Güncelleme",e);
-                            }
-                        });
-                    }
-                }
-            });
-        }catch (Exception e){
-            Log.w("Güncelleme",e);
-        }
-    }
-
-    public void qrTicketGuncelleme(){
-        try{
-            OkHttpClient client = new OkHttpClient();
-            String url = ipAdresi+":"+apiPort+"/api/qrticket/all/1";
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setText("2/9");
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimiSync.setVisibility(View.VISIBLE);
-                    });
-                }
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimi.setText("2/9");
-                    });
-                    if (response.isSuccessful()) {
-                        assert response.body() != null;
-                        final String myResponse = response.body().string();
-                        MainActivity.this.runOnUiThread(() -> {
-                            try {
-                                myDb.deleteAll("qrticket");
-
-                                String[] parts = myResponse.split(",");
-                                for (String uid : parts) {
-                                    myDb.qrticketInsert(uid);
-                                }
-
-                                Log.i("Güncelleme", "2 - QR BİLET");
-                                blacklistGuncelle();
-                            } catch (Exception e) {
-                                Log.w("Güncelleme",e);
-                            }
-                        });
-                    }
-                }
-            });
-        }catch (Exception e){
-            Log.w("Güncelleme",e);
-        }
-    }
-
-    public void blacklistGuncelle(){
-        try{
-            // BLACKLIST TEST
-            OkHttpClient client = new OkHttpClient();
-            String url = ipAdresi+":"+apiPort+"/api/card/2";
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setText("3/9");
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimiSync.setVisibility(View.VISIBLE);
-                    });
-                }
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimi.setText("3/9");
-                    });
-
-                    if (response.isSuccessful()) {
-                        assert response.body() != null;
-                        final String myResponse = response.body().string();
-                        MainActivity.this.runOnUiThread(() -> {
-                            try {
-                                myDb.deleteAll("blacklist");
-
-                                String[] parts = myResponse.split(",");
-                                for (String uid : parts) {
-                                    myDb.blacklistInsert(uid);
-                                }
-
-                                Log.i("Güncelleme", "3 - KARALİSTE");
-
-
-                            } catch (Exception e) {
-                                Log.w("Güncelleme",e);
-                            }
-
-                        });
-
-                        fotografGuncelle();
-
-                        //offlineKartGuncelle();
-                    }
-                }
-            });
-        }catch (Exception e){
-            Log.w("Güncelleme",e);
-        }
-    }
-
-    public void fotografGuncelle(){
-        try{
-            OkHttpClient client = new OkHttpClient();
-            String url = ipAdresi+":"+apiPort+"/api/user/imagelist";
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimi.setText("4/9");
-                        veriAktarimiSync.setVisibility(View.VISIBLE);
-                    });
-                }
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimi.setText("4/9");
-                    });
-                    if (response.isSuccessful()) {
-                        assert response.body() != null;
-                        final String myResponse = response.body().string();
-                        MainActivity.this.runOnUiThread(() -> {
-                            try {
-                                String[] parts = myResponse.split(",");
-                                for (String uid : parts) {
-                                    File image = new File("/storage/emulated/0/Pictures/"+uid+".jpg");
-                                    if(!image.exists()){
-                                        Log.w("image",ipAdresi+":"+apiPort+"/api/user/image/"+uid);
-                                        downloadImageNew(uid,ipAdresi+":"+apiPort+"/api/user/image/"+uid);
-                                    }
-                                }
-                                Log.i("Güncelleme", "4 - MÜŞTERİ RESİMLERİ");
-                                tarifeGuncelle();
-                            } catch (Exception e) {
-                                Log.w("Güncelleme",e);
-                            }
-                        });
-                        //offlineKartGuncelle();
-                    }
-                }
-            });
-        }catch (Exception e){
-            Log.w("Güncelleme",e);
-        }
-    }
-
-    public void tarifeGuncelle(){
-        try{
-            OkHttpClient client = new OkHttpClient();
-            String url = ipAdresi+":"+apiPort+"/api/pricing/"+istasyon_id;
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setText("5/9");
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimiSync.setVisibility(View.VISIBLE);
-                    });
-                }
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimi.setText("5/9");
-                    });
-                    if (response.isSuccessful()) {
-                        assert response.body() != null;
-                        final String myResponse = response.body().string();
-                        MainActivity.this.runOnUiThread(() -> {
-                            try {
-                                myDb.deleteAll("priceSchedule");
-                                String[] parts = myResponse.split("-");
-                                int i=0;
-                                for (String tarife : parts) {
-                                    //Log.i("tarife",tarife);
-                                    i=i+1;
-                                    String[] ayar = tarife.split(",");
-                                    myDb.tarifeEkle(i,ayar[0],"MESAJ",ayar[1],"tekli");
-                                }
-                                Log.i("Güncelleme", "5 - TARIFELER");
-                                offlineKartGuncelle();
-
-                            } catch (Exception e) {
-                                Log.w("Güncelleme",e);
-                            }
-                        });
-                    }
-                }
-            });
-        }catch (Exception e){
-            Log.w("Güncelleme",e);
-        }
-    }
-
-    public void offlineKartGuncelle(){
-        runOnUiThread(()->{
-            veriAktarimi.setText("6/9");
-            veriAktarimi.setVisibility(View.VISIBLE);
-            veriAktarimiSync.setVisibility(View.VISIBLE);
-        });
-
-        final int[] sayac = {0,-1};
-
-        String gelen = myDb.offlineCardSend(sayac[0]);
-        while(!gelen.equals("-1")){
-            gelen = myDb.offlineCardSend(sayac[0]);
-            if(gelen.equals("-1")){
-                break;
-            }
-            String[] bilgiler = gelen.split(",");
-
-            JSONObject jsonObject = new JSONObject();
-            try {
-                jsonObject.put("uid", bilgiler[0]);
-                jsonObject.put("onceki", bilgiler[1]);
-                jsonObject.put("sonraki", bilgiler[2]);
-                jsonObject.put("tarih", bilgiler[3]);
-                jsonObject.put("istasyon", bilgiler[4]);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            try{
-                if(sayac[0]!=sayac[1]){
-                    sayac[0]=sayac[1];
-                    MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-                    RequestBody body = RequestBody.create(JSON, jsonObject.toString());
-
-                    OkHttpClient client = new OkHttpClient();
-                    String url = ipAdresi+":"+apiPort+"/api/newcard/";
-                    Request request = new Request.Builder()
-                            .url(url)
-                            .post(body)
-                            .build();
-                    client.newCall(request).enqueue(new Callback() {
-                        @Override
-                        public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                            veriAktarimi.setText("6/9");
-                            veriAktarimi.setVisibility(View.VISIBLE);
-                            veriAktarimiSync.setVisibility(View.VISIBLE);
-                        }
-                        @Override
-                        public void onResponse(@NonNull Call call, @NonNull Response response) {
-                            myDb.deleteOfflineCard(bilgiler[5]);
-                            sayac[0]++;
-                        }
-                    });
-                }
-            }catch (Exception e){
-                Log.w("Güncelleme",e);
-            }
-        }
-
-        Log.i("Güncelleme","6 - Offline Kartlar");
-        yoneticiKartlarGuncelle();
-    }
-
-    public void yoneticiKartlarGuncelle(){
-        try{
-            OkHttpClient client = new OkHttpClient();
-            String url = ipAdresi+":"+apiPort+"/api/devcard/";
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setText("7/9");
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimiSync.setVisibility(View.VISIBLE);
-                    });
-                }
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimi.setText("7/9");
-                    });
-                    if (response.isSuccessful()) {
-                        assert response.body() != null;
-                        final String myResponse = response.body().string();
-                        MainActivity.this.runOnUiThread(() -> {
-
-                            myDb.deleteAll("yoneticiKartlar");
-                            try {
-                                String[] parts = myResponse.split(",");
-                                for (String uid : parts) {
-                                    myDb.yoneticikartEkle(uid);
-                                }
-                                Log.i("Güncelleme", "7 - YÖNETİCİ KARTLARI");
-                                veriAktarimi.setVisibility(View.INVISIBLE);
-                                veriAktarimiSync.setVisibility(View.INVISIBLE);
-                            } catch (Exception e) {
-                                Log.w("Güncelleme",e);
-                            }
-                        });
-                    }
-                }
-            });
-        }catch (Exception e){
-            Log.w("Güncelleme",e);
-        }
-    }
     public static void newCardReport(String uid,int onceki,int sonraki,String dateTime,String istasyon,boolean offline,String bid){
         try{
             JSONObject jsonObject = new JSONObject();
@@ -1332,7 +973,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void downloadImageNew(String filename, String downloadUrlOfImage){
+    public void downloadImageNew(String filename, String downloadUrlOfImage){
         try{
             DownloadManager dm = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
             Uri downloadUri = Uri.parse(downloadUrlOfImage);
