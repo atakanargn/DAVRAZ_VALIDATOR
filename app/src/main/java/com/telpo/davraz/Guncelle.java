@@ -59,6 +59,7 @@ public class Guncelle extends MainActivity{
 
             String url = ipAdresi+":"+apiPort+"/api/card/tanimli";
 
+
             Request request = new Request.Builder()
                     .url(url)
                     .build();
