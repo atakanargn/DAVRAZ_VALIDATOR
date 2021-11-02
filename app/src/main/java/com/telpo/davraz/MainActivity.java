@@ -91,7 +91,7 @@ public class MainActivity extends Activity {
     private TextView txtKartaYazilacak;
     private Button qroku;
     private LinearLayout linearLayout;
-    private TextView DateTime,stationID,veriAktarimi;
+    public TextView DateTime,stationID,veriAktarimi;
     private final int red = Color.parseColor("#66FF0000");
     private final int green = Color.parseColor("#6626FF00");
     private final int white = Color.parseColor("#66FFFFFF");
@@ -108,7 +108,7 @@ public class MainActivity extends Activity {
 
     private String currentDateandTime;
 
-    private ImageView photoView,veriAktarimiSync,ethernet,wifi;
+    public ImageView photoView,veriAktarimiSync,ethernet,wifi;
     private static Database myDb;
     private static String ipAdresi, socketPort,apiPort;
 
@@ -1392,7 +1392,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void downloadImageNew(String filename, String downloadUrlOfImage){
+    public void downloadImageNew(String filename, String downloadUrlOfImage){
         try{
             DownloadManager dm = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
             Uri downloadUri = Uri.parse(downloadUrlOfImage);
