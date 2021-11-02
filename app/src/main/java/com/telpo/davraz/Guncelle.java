@@ -48,7 +48,6 @@ public class Guncelle extends MainActivity{
         this.istasyon_id = myDb.ayarGetir("istasyonID");
         this.activity = activity;
 
-
     }
 
 

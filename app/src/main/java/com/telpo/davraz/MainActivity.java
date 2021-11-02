@@ -345,6 +345,10 @@ public class MainActivity extends Activity {
         stationID.setText(istasyon_id+"\n"+myDb.ayarGetir("turnikeIsim"));
 
         socketeBaglan();
+
+        Guncelle guncelle = new Guncelle(myDb,this);
+        guncelle.tanimKartlarGuncelle();
+
     }
 
     @SuppressLint("QueryPermissionsNeeded")

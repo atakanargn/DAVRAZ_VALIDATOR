@@ -209,5 +209,19 @@
             android:layout_marginTop="16dp"
             android:onClick="kaydet"/>
 
+        <Button
+            android:id="@+id/kioskMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="onKiosk"
+            android:text="onKiosk" />
+
+        <Button
+            android:id="@+id/kioskModeOff"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="offKiosk"
+            android:text="OffKiosk" />
+
     </LinearLayout>
 </LinearLayout>

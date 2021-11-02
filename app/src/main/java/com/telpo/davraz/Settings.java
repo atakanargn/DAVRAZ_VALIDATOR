@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -47,6 +48,12 @@ public class Settings extends Activity {
     private TextView stationID;
     private Button kurulumBtn;
     private Socket mSocket;
+    private Button kioskButton;
+    private Button kioskButtonOff;
+
+
+
+
 
     private final Emitter.Listener onSetup = new Emitter.Listener() {
         @SuppressLint("SetTextI18n")
@@ -185,6 +192,8 @@ public class Settings extends Activity {
         DateTime = (TextView) findViewById(R.id.DateTime);
         ethernet = (ImageView) findViewById(R.id.ethernet);
         wifi = (ImageView) findViewById(R.id.wifi);
+        kioskButton = (Button) findViewById(R.id.kioskMode);
+        kioskButtonOff = (Button) findViewById(R.id.kioskModeOff);
 
         final Handler handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(new Runnable() {
@@ -297,6 +306,18 @@ public class Settings extends Activity {
     public void onBackPressed() {
         startActivity(new Intent(Settings.this,MainActivity.class));
         finish();
+    }
+    public void onKiosk(View view){
+
+    KioskModeManager kioskModeManager = new KioskModeManager(Settings.this);
+    kioskModeManager.enableKioskMode(true);
+
+    }
+    public void offKiosk(View view){
+
+    KioskModeManager kioskModeManager = new KioskModeManager(Settings.this);
+    kioskModeManager.enableKioskMode(false);
+
     }
 
 }
