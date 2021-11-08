@@ -41,7 +41,7 @@
             <EditText
                 android:id="@+id/istasyonID_edit"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight=".6"
                 android:inputType="text"
                 android:text="32DAVIST01"
@@ -208,6 +208,20 @@
             android:textSize="32dp"
             android:layout_marginTop="16dp"
             android:onClick="kaydet"/>
+
+        <Button
+            android:id="@+id/kioskMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="onKiosk"
+            android:text="onKiosk" />
+
+        <Button
+            android:id="@+id/kioskModeOff"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="offKiosk"
+            android:text="OffKiosk" />
 
     </LinearLayout>
 </LinearLayout>

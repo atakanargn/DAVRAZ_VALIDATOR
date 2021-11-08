@@ -2,13 +2,9 @@ package com.telpo.davraz;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
 import android.app.PendingIntent;
-import android.app.admin.DevicePolicyManager;
-import android.app.admin.SystemUpdatePolicy;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -16,13 +12,10 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
@@ -36,7 +29,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcelable;
-import android.os.UserManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -53,6 +45,7 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.common.pos.api.util.PosUtil;
+import com.jakewharton.processphoenix.ProcessPhoenix;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -84,49 +77,47 @@ import pl.droidsonroids.gif.GifImageView;
 
 //ilk commit deneme
 public class MainActivity extends Activity {
-    private NfcAdapter mNfcAdapter;
-    private PendingIntent mPendingIntent;
-    private TextView txtKartaYazilacak;
-    private Button qroku;
-    private LinearLayout linearLayout;
-    private TextView DateTime,stationID,veriAktarimi;
-    private final int red = Color.parseColor("#66FF0000");
-    private final int green = Color.parseColor("#6626FF00");
-    private final int white = Color.parseColor("#66FFFFFF");
-    private int durum = 0;
+    public NfcAdapter mNfcAdapter;
+    public PendingIntent mPendingIntent;
+    public TextView txtKartaYazilacak;
+    public Button qroku;
+    public LinearLayout linearLayout;
+    public TextView DateTime,stationID,veriAktarimi;
+    public final int red = Color.parseColor("#66FF0000");
+    public final int green = Color.parseColor("#6626FF00");
+    public final int white = Color.parseColor("#66FFFFFF");
+    public int durum = 0;
 
-    private ComponentName mAdminComponentName;
-    private DevicePolicyManager mDevicePolicyManager;
+    public int sayac;
 
-    private int sayac;
+    public String istasyon_id;
 
-    private String istasyon_id;
+    public String basilanID;
 
-    private String basilanID;
+    public String currentDateandTime;
 
-    private String currentDateandTime;
+    public ImageView photoView,veriAktarimiSync,ethernet,wifi;
+    public static Database myDb;
+    public static String ipAdresi, socketPort,apiPort;
 
-    private ImageView photoView,veriAktarimiSync,ethernet,wifi;
-    private static Database myDb;
-    private static String ipAdresi, socketPort,apiPort;
+    public VideoView video;
 
-    private VideoView video;
+    public Tag detectedTag;
 
-    private Tag detectedTag;
+    public String gosterilmis="";
+    public boolean okutuldu=false;
+    public GifImageView arrowGif;
 
-    private String gosterilmis="";
-    private boolean okutuldu=false;
-    private GifImageView arrowGif;
+    public String kart_tipii;
 
-    private MediaPlayer tekli;
-    private MediaPlayer gecersiz;
-    private MediaPlayer yetersiz;
-    private String kart_tipii;
+    public String strYeniBakiye,strBakiye;
+    public int bakiye,yeniBakiye,dusecek;
 
-    private String strYeniBakiye,strBakiye;
-    private int bakiye,yeniBakiye,dusecek;
+    public boolean kartVar;
 
-    private boolean kartVar;
+    public Guncelle guncelle;
+
+    private final int REQUEST_READ_PHONE_STATE=1;
 
     private final Emitter.Listener relayOpen = new Emitter.Listener() {
         @SuppressLint("SetTextI18n")
@@ -142,7 +133,7 @@ public class MainActivity extends Activity {
                     arrowGif.setImageResource(R.drawable.arrow);
                     arrowGif.setVisibility(View.VISIBLE);
                     PosUtil.setRelayPower(1);
-                    roleKapat();
+                    role();
                     final Handler handler = new Handler(Looper.getMainLooper());
                     handler.postDelayed(() -> {
                         linearLayout.getBackground().setTint(white);
@@ -186,34 +177,21 @@ public class MainActivity extends Activity {
         }
     };
 
-    public void roleKapat() {
+    // Allowlist two apps.
+    private static final String KIOSK_PACKAGE = "com.example.kiosk";
+    private static final String PLAYER_PACKAGE = "com.example.player";
+    private static final String[] APP_PACKAGES = {KIOSK_PACKAGE, PLAYER_PACKAGE};
+
+    public void role() {
+        PosUtil.setRelayPower(1);
         final Handler handler = new Handler(Looper.getMainLooper());
-        handler.postDelayed(() -> PosUtil.setRelayPower(0), 500);
+        handler.postDelayed(() -> PosUtil.setRelayPower(0), 400);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    @SuppressLint({"SetTextI18n", "UnspecifiedImmutableFlag"})
+    @SuppressLint({"UnspecifiedImmutableFlag", "SetTextI18n"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        //Binding test kodlari....
-       /* nfcBinding = ActivityNfcBinding.inflate(getLayoutInflater());
-        View viewNfc = nfcBinding.getRoot();
-        setContentView(viewNfc);
-        titlebarBinding = TitlebarBinding.inflate(getLayoutInflater());
-        View viewBinding = titlebarBinding.getRoot();
-        setContentView(viewBinding);*/
-
-
-
-
-
-
-
-
-
-
 
         // FULLSCREEN, HIDE NAVIGATION
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -222,24 +200,18 @@ public class MainActivity extends Activity {
                 View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
                         View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
         setContentView(R.layout.activity_nfc);
-        tekli = MediaPlayer.create(this,R.raw.tekli);
-        gecersiz = MediaPlayer.create(this,R.raw.gecersiz);
-        yetersiz = MediaPlayer.create(this,R.raw.yetersiz);
 
-
-
-
-        // EĞER UYGULAMA İLK DEFA AÇILIYORSA, VARSAYILAN AYARLAR GELECEKTİR
         myDb = new Database(this);
+
         try {
             myDb.ayarEkle("turnikeIsim","-");
             myDb.ayarEkle("kurulum","1");
             myDb.ayarEkle("istasyonID", "-");
             myDb.ayarEkle("sunucuIP", "88.255.248.244");
             myDb.ayarEkle("socketPort", "9872");
-            myDb.ayarEkle("apiPort", "9091");
-            myDb.ayarEkle("turnikeBekleme", "20");
-            myDb.ayarEkle("kartBekleme", "480");
+            myDb.ayarEkle("apiPort", "8080");
+            myDb.ayarEkle("turnikeBekleme", "2");
+            myDb.ayarEkle("kartBekleme", "1");
         }catch (Exception e){
             //
         }
@@ -250,12 +222,11 @@ public class MainActivity extends Activity {
         socketPort = myDb.ayarGetir("socketPort");
         apiPort   = myDb.ayarGetir("apiPort");
 
-       /* if(myDb.ayarGetir("kurulum").equals("0")){
-            startActivity(new Intent(MainActivity.this,Settings.class));
-        }*/
+       if(myDb.ayarGetir("kurulum").equals("0")){
+            startActivity(new Intent(MainActivity.this, Settingss.class));
+        }
 
         initUI();
-
         istasyon_id = myDb.ayarGetir("istasyonID");
 
         // NFC AYARLARI
@@ -265,10 +236,24 @@ public class MainActivity extends Activity {
         mPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, getClass()), 0);
         init_NFC();
 
-        // SOCKETIO AYARLARI
         stationID.setText(istasyon_id+"\n"+myDb.ayarGetir("turnikeIsim"));
-
         socketeBaglan();
+
+        guncelle = new Guncelle(myDb,MainActivity.this);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_READ_PHONE_STATE:
+                if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    //TODO
+                }
+                break;
+
+            default:
+                break;
+        }
     }
 
     @SuppressLint("QueryPermissionsNeeded")
@@ -307,14 +292,11 @@ public class MainActivity extends Activity {
                     ethernet.setVisibility(View.INVISIBLE);
                 }
 
-
                 currentDateandTime = new SimpleDateFormat("dd-MM-yyyy\nHH:mm:ss").format(new Date());
                 DateTime.setText(currentDateandTime);
 
                 if(sayac>=246){
                     String path = "android.resource://" + getPackageName() + "/" + R.raw.video1;
-                    /*nfcBinding.videoView.setVideoURI(Uri.parse(path));
-                    nfcBinding.videoView.start();*/
                     video.setVideoURI(Uri.parse(path));
                     video.start();
                     sayac=0;
@@ -326,7 +308,7 @@ public class MainActivity extends Activity {
 
                 if(!gosterilmis.equals("")){
                     final Handler gosterilmisTemizle = new Handler(Looper.getMainLooper());
-                    gosterilmisTemizle.postDelayed(() -> {gosterilmis="";}, Integer.parseInt(myDb.ayarGetir("kartBekleme"))* 1000L);
+                    gosterilmisTemizle.postDelayed(() -> gosterilmis="", Integer.parseInt(myDb.ayarGetir("kartBekleme"))* 1000L);
                 }
 
                 View decorView = getWindow().getDecorView();
@@ -345,22 +327,7 @@ public class MainActivity extends Activity {
             }
         }, 1000);
 
-        final Handler veriIletimiTimer = new Handler(Looper.getMainLooper());
-        veriIletimiTimer.postDelayed(new Runnable() {
-            @SuppressLint("SimpleDateFormat")
-            @Override
-            public void run() {
-                if(myDb.ayarGetir("kurulum").equals("1")){
-
-                }
-                guncelle();
-                veriIletimiTimer.postDelayed(this,10000);
-            }
-        }, 1000);
-
         qroku.setOnClickListener(view -> {
-
-
             PackageManager packageManager = getPackageManager();
             Intent intent = new Intent();
             intent.setClassName("com.telpo.tps550.api", "com.telpo.tps550.api.barcode.Capture");
@@ -385,65 +352,25 @@ public class MainActivity extends Activity {
         });
 
         gifView.setOnClickListener(v -> {
-            @SuppressLint("WifiManagerLeak") WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-            WifiInfo info = manager.getConnectionInfo();
-            @SuppressLint({"MissingPermission", "HardwareIds"}) String address = info.getMacAddress();
-
             final AlertDialog.Builder dialog = new AlertDialog.Builder(this).setTitle("Veri Aktarımı")
-                    .setMessage("IPv4 : "+getIPAddress()+"\nMAC : "+address+"\nCihaz : "+istasyon_id+"\nVeri aktarımı başlatılıyor.");
+                    .setMessage("Cihaz : "+istasyon_id+"\nVeri aktarımı başlatılıyor.");
             final AlertDialog alert = dialog.create();
+            guncelle.start();
             alert.show();
-
             final Handler alerthandler  = new Handler();
             final Runnable runnable = () -> {
                 if (alert.isShowing()) {
                     alert.dismiss();
                 }
             };
-
             alert.setOnDismissListener(dialog1 -> alerthandler.removeCallbacks(runnable));
-
             alerthandler.postDelayed(runnable, 2000);
-            guncelle();
         });
 
         VideoView video = findViewById(R.id.videoView);
         String path = "android.resource://" + getPackageName() + "/" + R.raw.video1;
         video.setVideoURI(Uri.parse(path));
         video.start();
-       /* nfcBinding.videoView.setVideoURI(Uri.parse(path));
-        nfcBinding.videoView.start();*/
-
-    }
-
-    public static String getIPAddress() {
-
-        final String[] returned = {""};
-        try{
-            OkHttpClient client = new OkHttpClient();
-            String url = "https://myexternalip.com/raw";
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    returned[0] = "255.255.255.0";
-                }
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                    if (response.isSuccessful()) {
-                        assert response.body() != null;
-                        returned[0] = response.body().string();
-                    }else{
-                        returned[0] = "255.255.255.0";
-                    }
-                }
-            });
-        }catch (Exception e){
-            returned[0] = "255.255.255.0";
-        }
-        return returned[0];
     }
 
     @SuppressLint("SetTextI18n")
@@ -493,8 +420,7 @@ public class MainActivity extends Activity {
                         txtKartaYazilacak.setText("İyi eğlenceler!");
                         arrowGif.setImageResource(R.drawable.arrow);
                         arrowGif.setVisibility(View.VISIBLE);
-                        PosUtil.setRelayPower(1);
-                        roleKapat();
+                        role();
                         final Handler handler = new Handler(Looper.getMainLooper());
                         handler.postDelayed(() -> {
                             linearLayout.getBackground().setTint(white);
@@ -507,7 +433,6 @@ public class MainActivity extends Activity {
                         photoView.setVisibility(View.INVISIBLE);
                         txtKartaYazilacak.setText("Geçersiz bilet!");
                         arrowGif.setVisibility(View.INVISIBLE);
-                        roleKapat();
                         final Handler handler = new Handler(Looper.getMainLooper());
                         handler.postDelayed(() -> {
                             linearLayout.getBackground().setTint(white);
@@ -521,379 +446,6 @@ public class MainActivity extends Activity {
             } else {
                 Toast.makeText(MainActivity.this, "Scan Failed", Toast.LENGTH_LONG).show();
             }
-        }
-    }
-
-    public void guncelle(){
-        veriAktarimi.setVisibility(View.VISIBLE);
-        tanimKartlarGuncelle();
-    }
-
-    public void tanimKartlarGuncelle(){
-        try{
-            OkHttpClient client = new OkHttpClient();
-            String url = ipAdresi+":"+apiPort+"/api/card/tanimli";
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setText("1/9");
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimiSync.setVisibility(View.VISIBLE);
-                    });
-                }
-
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimi.setText("1/9");
-                    });
-                    if (response.isSuccessful()) {
-                        final String myResponse = response.body().string();
-                        MainActivity.this.runOnUiThread(() -> {
-
-                            myDb.deleteAll("tanimliKartlar");
-                            try {
-                                String[] parts = myResponse.split(",");
-                                for (String uid : parts) {
-                                    myDb.kartEkle(uid);
-                                }
-                                Log.i("Güncelleme", "1 - TANIMLI KARTLAR");
-                                qrTicketGuncelleme();
-                            } catch (Exception e) {
-                                Log.w("Güncelleme",e);
-                            }
-                        });
-                    }
-                }
-            });
-        }catch (Exception e){
-            Log.w("Güncelleme",e);
-        }
-    }
-
-    public void qrTicketGuncelleme(){
-        try{
-            OkHttpClient client = new OkHttpClient();
-            String url = ipAdresi+":"+apiPort+"/api/qrticket/all/1";
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setText("2/9");
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimiSync.setVisibility(View.VISIBLE);
-                    });
-                }
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimi.setText("2/9");
-                    });
-                    if (response.isSuccessful()) {
-                        assert response.body() != null;
-                        final String myResponse = response.body().string();
-                        MainActivity.this.runOnUiThread(() -> {
-                            try {
-                                myDb.deleteAll("qrticket");
-
-                                String[] parts = myResponse.split(",");
-                                for (String uid : parts) {
-                                    myDb.qrticketInsert(uid);
-                                }
-
-                                Log.i("Güncelleme", "2 - QR BİLET");
-                                blacklistGuncelle();
-                            } catch (Exception e) {
-                                Log.w("Güncelleme",e);
-                            }
-                        });
-                    }
-                }
-            });
-        }catch (Exception e){
-            Log.w("Güncelleme",e);
-        }
-    }
-
-    public void blacklistGuncelle(){
-        try{
-            // BLACKLIST TEST
-            OkHttpClient client = new OkHttpClient();
-            String url = ipAdresi+":"+apiPort+"/api/card/2";
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setText("3/9");
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimiSync.setVisibility(View.VISIBLE);
-                    });
-                }
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimi.setText("3/9");
-                    });
-
-                    if (response.isSuccessful()) {
-                        assert response.body() != null;
-                        final String myResponse = response.body().string();
-                        MainActivity.this.runOnUiThread(() -> {
-                            try {
-                                myDb.deleteAll("blacklist");
-
-                                String[] parts = myResponse.split(",");
-                                for (String uid : parts) {
-                                    myDb.blacklistInsert(uid);
-                                }
-
-                                Log.i("Güncelleme", "3 - KARALİSTE");
-
-
-                            } catch (Exception e) {
-                                Log.w("Güncelleme",e);
-                            }
-
-                        });
-
-                        fotografGuncelle();
-
-                        //offlineKartGuncelle();
-                    }
-                }
-            });
-        }catch (Exception e){
-            Log.w("Güncelleme",e);
-        }
-    }
-
-    public void fotografGuncelle(){
-        tarifeGuncelle();
-        /*try{
-            OkHttpClient client = new OkHttpClient();
-            String url = ipAdresi+":"+apiPort+"/api/user/imagelist";
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimi.setText("4/9");
-                        veriAktarimiSync.setVisibility(View.VISIBLE);
-                    });
-                }
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimi.setText("4/9");
-                    });
-                    if (response.isSuccessful()) {
-                        assert response.body() != null;
-                        final String myResponse = response.body().string();
-                        MainActivity.this.runOnUiThread(() -> {
-                            try {
-                                String[] uids = myResponse.split(",");
-                                for (String uid : uids) {
-                                    String[] parts = uid.split(".");
-
-                                    File image = new File("/storage/emulated/0/Pictures/"+parts[0]+".jpg");
-                                    if(!image.exists() && Integer.parseInt(parts[1])>Integer.parseInt(myDb.resimGetir(parts[0]))){
-                                        Log.w("image",ipAdresi+":"+apiPort+"/api/user/image/"+uid);
-                                        downloadImageNew(uid,ipAdresi+":"+apiPort+"/api/user/image/"+uid);
-                                    }else{
-
-                                    }
-                                }
-                                Log.i("Güncelleme", "4 - MÜŞTERİ RESİMLERİ");
-                                tarifeGuncelle();
-                            } catch (Exception e) {
-                                Log.w("Güncelleme",e);
-                            }
-                        });
-                        //offlineKartGuncelle();
-                    }
-                }
-            });
-        }catch (Exception e){
-            Log.w("Güncelleme",e);
-        }*/
-    }
-
-    public void tarifeGuncelle(){
-        try{
-            OkHttpClient client = new OkHttpClient();
-            String url = ipAdresi+":"+apiPort+"/api/pricing/"+istasyon_id;
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setText("5/9");
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimiSync.setVisibility(View.VISIBLE);
-                    });
-                }
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimi.setText("5/9");
-                    });
-                    if (response.isSuccessful()) {
-                        assert response.body() != null;
-                        final String myResponse = response.body().string();
-                        MainActivity.this.runOnUiThread(() -> {
-                            try {
-                                myDb.deleteAll("priceSchedule");
-                                String[] parts = myResponse.split("-");
-                                int i=0;
-                                for (String tarife : parts) {
-                                    //Log.i("tarife",tarife);
-                                    i=i+1;
-                                    String[] ayar = tarife.split(",");
-                                    myDb.tarifeEkle(i,ayar[0],"MESAJ",ayar[1],"tekli");
-                                }
-                                Log.i("Güncelleme", "5 - TARIFELER");
-                                offlineKartGuncelle();
-
-                            } catch (Exception e) {
-                                Log.w("Güncelleme",e);
-                            }
-                        });
-                    }
-                }
-            });
-        }catch (Exception e){
-            Log.w("Güncelleme",e);
-        }
-    }
-
-    public void offlineKartGuncelle(){
-        runOnUiThread(()->{
-            veriAktarimi.setText("6/9");
-            veriAktarimi.setVisibility(View.VISIBLE);
-            veriAktarimiSync.setVisibility(View.VISIBLE);
-        });
-
-        final int[] sayac = {0,-1};
-
-        String gelen = myDb.offlineCardSend(sayac[0]);
-        while(!gelen.equals("-1")){
-            gelen = myDb.offlineCardSend(sayac[0]);
-            if(gelen.equals("-1")){
-                break;
-            }
-            String[] bilgiler = gelen.split(",");
-
-            JSONObject jsonObject = new JSONObject();
-            try {
-                jsonObject.put("uid", bilgiler[0]);
-                jsonObject.put("onceki", bilgiler[1]);
-                jsonObject.put("sonraki", bilgiler[2]);
-                jsonObject.put("tarih", bilgiler[3]);
-                jsonObject.put("istasyon", bilgiler[4]);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            try{
-                if(sayac[0]!=sayac[1]){
-                    sayac[0]=sayac[1];
-                    MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-                    RequestBody body = RequestBody.create(JSON, jsonObject.toString());
-
-                    OkHttpClient client = new OkHttpClient();
-                    String url = ipAdresi+":"+apiPort+"/api/newcard/";
-                    Request request = new Request.Builder()
-                            .url(url)
-                            .post(body)
-                            .build();
-                    client.newCall(request).enqueue(new Callback() {
-                        @Override
-                        public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                            veriAktarimi.setText("6/9");
-                            veriAktarimi.setVisibility(View.VISIBLE);
-                            veriAktarimiSync.setVisibility(View.VISIBLE);
-                        }
-                        @Override
-                        public void onResponse(@NonNull Call call, @NonNull Response response) {
-                            myDb.deleteOfflineCard(bilgiler[5]);
-                            sayac[0]++;
-                        }
-                    });
-                }
-            }catch (Exception e){
-                Log.w("Güncelleme",e);
-            }
-        }
-
-        Log.i("Güncelleme","6 - Offline Kartlar");
-        yoneticiKartlarGuncelle();
-    }
-
-    public void yoneticiKartlarGuncelle(){
-        try{
-            OkHttpClient client = new OkHttpClient();
-            String url = ipAdresi+":"+apiPort+"/api/devcard/";
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setText("7/9");
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimiSync.setVisibility(View.VISIBLE);
-                    });
-                }
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                    runOnUiThread(() -> {
-                        veriAktarimi.setVisibility(View.VISIBLE);
-                        veriAktarimi.setText("7/9");
-                    });
-                    if (response.isSuccessful()) {
-                        assert response.body() != null;
-                        final String myResponse = response.body().string();
-                        MainActivity.this.runOnUiThread(() -> {
-
-                            myDb.deleteAll("yoneticiKartlar");
-                            try {
-                                String[] parts = myResponse.split(",");
-                                for (String uid : parts) {
-                                    myDb.yoneticikartEkle(uid);
-                                }
-                                Log.i("Güncelleme", "7 - YÖNETİCİ KARTLARI");
-                                veriAktarimi.setVisibility(View.INVISIBLE);
-                                veriAktarimiSync.setVisibility(View.INVISIBLE);
-                            } catch (Exception e) {
-                                Log.w("Güncelleme",e);
-                            }
-                        });
-                    }
-                }
-            });
-        }catch (Exception e){
-            Log.w("Güncelleme",e);
         }
     }
 
@@ -948,7 +500,6 @@ public class MainActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-
             if (mNfcAdapter != null) {
                 mNfcAdapter.enableForegroundDispatch(this, mPendingIntent, null, null);
             }
@@ -961,7 +512,7 @@ public class MainActivity extends Activity {
             getWindow().getDecorView().setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|
                             View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-            basilanID=ByteArrayToHexString(Objects.<byte[]>requireNonNull(intent.getByteArrayExtra(NfcAdapter.EXTRA_ID)));
+            basilanID=ByteArrayToHexString(Objects.requireNonNull(intent.getByteArrayExtra(NfcAdapter.EXTRA_ID)));
             Log.w("OKUTULAN KART",basilanID);
 
             kartVar=true;
@@ -973,7 +524,6 @@ public class MainActivity extends Activity {
                     gosterilmis_ses.start();
                     linearLayout.getBackground().setTint(red);
                     txtKartaYazilacak.setText("GÖSTERİLMİŞ KART!");
-                    roleKapat();
                     final Handler handler = new Handler(Looper.getMainLooper());
                     handler.postDelayed(() -> {
                         linearLayout.getBackground().setTint(white);
@@ -984,7 +534,7 @@ public class MainActivity extends Activity {
                     gosterilmis = basilanID;
 
                     if(myDb.yoneticiKartController(basilanID)){
-                        startActivity(new Intent(MainActivity.this,Settings.class));
+                        startActivity(new Intent(MainActivity.this, Settingss.class));
                         durum=5;
                         finish();
                     }else {
@@ -993,7 +543,6 @@ public class MainActivity extends Activity {
                             gecersiz.start();
                             linearLayout.getBackground().setTint(red);
                             txtKartaYazilacak.setText("KARTINIZ KAPATILMIŞTIR!");
-                            roleKapat();
                             final Handler handler = new Handler(Looper.getMainLooper());
                             handler.postDelayed(() -> {
                                 linearLayout.getBackground().setTint(white);
@@ -1014,7 +563,6 @@ public class MainActivity extends Activity {
                             gecersiz.start();
                             linearLayout.getBackground().setTint(red);
                             txtKartaYazilacak.setText("TANIMSIZ KART");
-                            roleKapat();
                             final Handler handler = new Handler(Looper.getMainLooper());
                             handler.postDelayed(() -> {
                                 linearLayout.getBackground().setTint(white);
@@ -1073,54 +621,25 @@ public class MainActivity extends Activity {
     }
 
 
+    @SuppressLint("SetTextI18n")
     void writeTag(NdefMessage message, Tag tag)
     {
-        int size;
-        try {
-            size = message.toByteArray().length;
-        }catch (Exception ignored){
-            return;
-        }
         try
         {
             Ndef ndef = Ndef.get(tag);
             if (ndef != null)
             {
 
-                ndef.connect();
 
-                final Handler kartVarTimer = new Handler(Looper.getMainLooper());
-                kartVarTimer.postDelayed(new Runnable() {
-                        @SuppressLint("SimpleDateFormat")
-                        @Override
-                        public void run() {
-                            if(!ndef.isConnected()){
-                                kartVar=false;
-                            }
-                            kartVarTimer.postDelayed(this,10);
-                        }
-                }, 10);
-
-                if (!ndef.isWritable())
-                {
-                    Toast.makeText(MainActivity.this, "Bu kart yazılabilir değil.", Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                if (ndef.getMaxSize() < size)
-                {
-                    Toast.makeText(MainActivity.this,
-                            "Kart boyutu desteklenmiyor", Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                if(kartVar){
                     try{
+                        ndef.connect();
                         ndef.writeNdefMessage(message);
+                        ndef.close();
                     }catch(java.io.IOException e){
                         txtKartaYazilacak.setVisibility(View.VISIBLE);
                         txtKartaYazilacak.setText("HATAHATAHATA");
                         linearLayout.getBackground().setTint(red);
+                        ProcessPhoenix.triggerRebirth(this);
                     }
 
                     if(dusecek==-1){
@@ -1151,8 +670,8 @@ public class MainActivity extends Activity {
                         }else{
                             txtKartaYazilacak.setText("KARTINIZI ÇEKEBİLİRSİNİZ\n\nIyi eğlenceler!\nKALAN BAKIYE : "+ strBakiye);
                         }
+                        role();
                         linearLayout.getBackground().setTint(green);
-                        PosUtil.setRelayPower(1);
                         durum=1;
                     }
 
@@ -1168,12 +687,7 @@ public class MainActivity extends Activity {
                     }
                     arrowGif.setImageResource(R.drawable.arrow);
                     arrowGif.setVisibility(View.VISIBLE);
-                }else{
-                    txtKartaYazilacak.setVisibility(View.VISIBLE);
-                    txtKartaYazilacak.setText("Kartınızı tekrar okutun!");
-                    linearLayout.getBackground().setTint(red);
-                }
-                roleKapat();
+
                 final Handler handler = new Handler(Looper.getMainLooper());
                 handler.postDelayed(() -> {
                     linearLayout.getBackground().setTint(white);
@@ -1202,12 +716,13 @@ public class MainActivity extends Activity {
 
     @SuppressLint("SetTextI18n")
     private NdefMessage buildNdefMessage(String parsedData) throws InterruptedException, UnsupportedEncodingException {
-        NdefMessage message = null;
-        String yazilacak="";
-        String data = basilanID+",KOOP2021,0,sivil";
+        NdefMessage message;
+        String yazilacak;
+        String data;
 
         Log.w("KART ŞİFRELEME - E",parsedData);
         parsedData = decrypt(parsedData);
+        assert parsedData != null;
         Log.w("KART ŞİFRELEME - D",parsedData);
         if(parsedData.contains("KOOP2021")){
             String[] income = parsedData.split(",");
@@ -1220,6 +735,7 @@ public class MainActivity extends Activity {
                 String mimeType = "application/com.telpo.davraz";
 
                 byte[] mimeBytes = mimeType.getBytes(StandardCharsets.UTF_8);
+                assert yazilacak != null;
                 byte[] dataBytes = yazilacak.getBytes(StandardCharsets.UTF_8);
                 byte[] id = new byte[0];
 
@@ -1251,6 +767,7 @@ public class MainActivity extends Activity {
         String mimeType = "application/com.telpo.davraz";
 
         byte[] mimeBytes = mimeType.getBytes(StandardCharsets.UTF_8);
+        assert yazilacak != null;
         byte[] dataBytes = yazilacak.getBytes(StandardCharsets.UTF_8);
         byte[] id = new byte[0];
 
@@ -1357,7 +874,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void downloadImageNew(String filename, String downloadUrlOfImage){
+    public void downloadImageNew(String filename, String downloadUrlOfImage){
         try{
             DownloadManager dm = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
             Uri downloadUri = Uri.parse(downloadUrlOfImage);

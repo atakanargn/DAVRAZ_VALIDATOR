@@ -1,7 +1,5 @@
 package com.telpo.davraz;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
@@ -9,24 +7,15 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
-import android.view.View;
-
-import com.common.pos.api.util.PosUtil;
 
 public class Database extends SQLiteOpenHelper {
 
     // Database Version
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 4;
 
     // Database Name
     private static final String DATABASE_NAME = "database"+Integer.toString(DATABASE_VERSION)+".db";
-
-    private static final String TABLE_NAME = "settings";
-    private static String SETTING_NAME  = "name";
-    private static String SETTING_VALUE = "value";
 
     public Database(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -91,6 +80,34 @@ public class Database extends SQLiteOpenHelper {
         return value;
     }
 
+    // RESIM EKLEME
+    public void resimEkle(String uid, String version) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("UID", uid);
+        values.put("version", version);
+
+        Cursor cursor = db.rawQuery("SELECT * FROM musteriResimleri;", null);
+
+        db.insert("musteriResimleri", null, values);
+    }
+
+    // RESİMLERİN İÇERİSİNDEN İSTENEN RESMİ ÇEKME
+    public String resimGetir(String uid){
+        String value = "";
+        String selectQuery = "SELECT * FROM musteriResimleri WHERE UID='"+uid+"';";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        cursor.moveToFirst();
+        if(cursor.getCount() > 0){
+            value = cursor.getString(1);
+        }else{
+            value = "-1";
+        }
+        cursor.close();
+        return value;
+    }
+
     // AYAR EKLEME
     public void ayarEkle(String name, String value) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -102,6 +119,8 @@ public class Database extends SQLiteOpenHelper {
 
         db.insert("settings", null, values);
     }
+
+
 
     // AYARLARIN İÇERİSİNDEN İSTENEN AYARI ÇEKME
     public String ayarGetir(String name){
@@ -118,7 +137,6 @@ public class Database extends SQLiteOpenHelper {
         }
 
         cursor.close();
-        ;
         return value;
     }
 
@@ -399,6 +417,8 @@ public class Database extends SQLiteOpenHelper {
         cursor.close();
         return value;
     }
+
+
 
     @Override
     public void onUpgrade(SQLiteDatabase arg0, int arg1, int arg2) {

@@ -12,6 +12,9 @@
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.NFC" />
     <uses-feature android:name="android.hardware.nfc" />
+
+    <uses-permission android:name="android.permission.REBOOT" android:protectionLevel="signature|privileged"
+        tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
@@ -25,10 +28,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:lockTaskMode="if_whitelisted">
-        <activity android:name="com.telpo.davraz.Splash" android:launchMode="singleTask"
-            android:exported="true">
 
-        </activity>
         <activity android:name="com.telpo.davraz.MainActivity" android:launchMode="singleTask"
             android:exported="true">
 
@@ -51,7 +51,7 @@
 
         </activity>
 
-        <activity android:name="com.telpo.davraz.Settings" android:launchMode="singleTask" android:noHistory="true">
+        <activity android:name="com.telpo.davraz.Settingss" android:launchMode="singleTask" android:noHistory="true">
 
     </activity>
 
