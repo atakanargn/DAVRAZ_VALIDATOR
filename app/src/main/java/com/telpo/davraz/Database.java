@@ -19,7 +19,7 @@ import com.common.pos.api.util.PosUtil;
 public class Database extends SQLiteOpenHelper {
 
     // Database Version
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 1;
 
     // Database Name
     private static final String DATABASE_NAME = "database"+Integer.toString(DATABASE_VERSION)+".db";
@@ -49,6 +49,8 @@ public class Database extends SQLiteOpenHelper {
 
         String createyoneticiKartlar  = "CREATE TABLE IF NOT EXISTS yoneticiKartlar (UID TEXT UNIQUE, PRIMARY KEY(UID));";
 
+        String musteriResimleri       = "CREATE TABLE IF NOT EXISTS musteriResimleri (UID TEXT UNIQUE PRIMARY KEY, version INTEGER);";
+
 
         db.execSQL(createSettings);
         db.execSQL(createBlacklist);
@@ -59,6 +61,7 @@ public class Database extends SQLiteOpenHelper {
         db.execSQL(priceSchedule);
         db.execSQL(allCardData);
         db.execSQL(createyoneticiKartlar);
+        db.execSQL(musteriResimleri);
     }
 
     // CARD DATA EKLE
@@ -98,7 +101,6 @@ public class Database extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery("SELECT * FROM settings;", null);
 
         db.insert("settings", null, values);
-        ;
     }
 
     // AYARLARIN İÇERİSİNDEN İSTENEN AYARI ÇEKME
